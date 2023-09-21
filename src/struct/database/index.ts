@@ -10,7 +10,7 @@ const { DB } = process.env;
 
 export default class Database {
     readonly connection: typeof mongoose;
-    
+
     readonly applications: DatabaseApplications;
     readonly guilds: DatabaseGuilds;
     readonly tickets: DatabaseTickets;
