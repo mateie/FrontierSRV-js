@@ -19,7 +19,6 @@ import {
     ExportReturnType,
     generateFromMessages,
 } from "discord-html-transcripts";
-import moment from "moment";
 
 export class ApplyButton extends InteractionHandler {
     constructor(ctx: PieceContext, opts: InteractionHandler.Options) {
@@ -42,6 +41,8 @@ export class ApplyButton extends InteractionHandler {
 
         const { guild, user } = interaction;
 
+        await interaction.deferReply({ ephemeral: true });
+
         const application = await Application.findOne({
             userId: user.id,
         });
@@ -49,36 +50,32 @@ export class ApplyButton extends InteractionHandler {
         const dbUser = await database.users.fetch(user);
 
         if (dbUser.age < 18)
-            return interaction.reply({
+            return interaction.editReply({
                 content:
                     "**You must be 18 or older to apply!** *If you think this is an error, please contact staff*",
-                ephemeral: true,
             });
 
         if (application) {
             switch (application.status) {
                 case "approved":
-                    return interaction.reply({
+                    return interaction.editReply({
                         content:
                             "**You already have an approved application!**",
-                        ephemeral: true,
                     });
                 case "pending":
-                    return interaction.reply({
+                    return interaction.editReply({
                         content: "**You already have an application pending!**",
-                        ephemeral: true,
                     });
                 case "denied":
                     if (
                         dbUser.canSubmitAgainAt &&
                         dbUser.canSubmitAgainAt < Date.now()
                     )
-                        return interaction.reply({
+                        return interaction.editReply({
                             content: `**You already have a denied application!**\n\n**You can submit another application in** ***${ts(
                                 dbUser.canSubmitAgainAt,
                                 "R",
                             )}***`,
-                            ephemeral: true,
                         });
             }
         }
@@ -102,9 +99,8 @@ export class ApplyButton extends InteractionHandler {
                 (thread) => thread.name === applicationName,
             )
         )
-            return interaction.reply({
+            return interaction.editReply({
                 content: "**You already started an application process!**",
-                ephemeral: true,
             });
 
         const thread = await applicationCh.threads.create({
@@ -116,9 +112,8 @@ export class ApplyButton extends InteractionHandler {
 
         await thread.members.add(user.id);
 
-        await interaction.reply({
+        await interaction.editReply({
             content: `**Your application process has started!**\n\n**Click the channel below 👇**\n**<#${thread.id}>**`,
-            ephemeral: true,
         });
 
         const embed = util
