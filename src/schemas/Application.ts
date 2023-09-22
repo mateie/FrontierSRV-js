@@ -6,6 +6,7 @@ export interface IApplication {
     userId: string;
     username: string;
     mcUsername: string;
+    mcPlatform: String;
     iconURL: string;
     guildId: string;
     questions: ApplicationQuestions;
@@ -27,6 +28,7 @@ const schema = new Schema<IApplication>({
     userId: { type: String, required: true },
     username: { type: String, required: true },
     mcUsername: { type: String, required: true },
+    mcPlatform: { type: String, required: true },
     iconURL: { type: String, required: true },
     questions: [],
     transcript: { type: Buffer, required: true },
