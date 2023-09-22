@@ -247,12 +247,19 @@ export class ApplicationResponseButtons extends InteractionHandler {
                 await ac
                     .query({
                         query: gql`
-                            query whitelistPlayer($username: String!) {
-                                whitelistPlayer(username: $username)
+                            query whitelistPlayer(
+                                $username: String!
+                                $platform: String!
+                            ) {
+                                whitelistPlayer(
+                                    username: $username
+                                    platform: $platform
+                                )
                             }
                         `,
                         variables: {
                             username: application.mcUsername,
+                            platform: application.mcPlatform,
                         },
                     })
                     .catch((err: any) => console.log(err));

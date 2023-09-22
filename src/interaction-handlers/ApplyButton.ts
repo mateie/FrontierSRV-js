@@ -851,6 +851,7 @@ export class ApplyButton extends InteractionHandler {
             userId: user.id,
             username: user.username,
             mcUsername: usernameAnswer,
+            mcPlatform: platformInteraction.customId.split("_")[0],
             iconURL: user.displayAvatarURL()
                 ? user.displayAvatarURL()
                 : user.defaultAvatarURL,
