@@ -3,7 +3,12 @@ import {
     InteractionHandlerTypes,
     PieceContext,
 } from "@sapphire/framework";
-import { ButtonInteraction, ButtonStyle, TextInputStyle } from "discord.js";
+import {
+    ButtonInteraction,
+    ButtonStyle,
+    ComponentType,
+    TextInputStyle,
+} from "discord.js";
 import Application from "#schemas/Application";
 import moment from "moment";
 import { gql } from "@apollo/client";
@@ -133,20 +138,58 @@ export class ApplicationResponseButtons extends InteractionHandler {
                     break;
             }
 
-            await interaction.showModal(modal);
-
-            const mInteraction = await interaction
-                .awaitModalSubmit({
-                    time: 5000,
-                })
-                .catch(() => null);
+            const askForReason = await interaction.reply({
+                content: "**Would you like to provide a reason?**",
+                ephemeral: true,
+                fetchReply: true,
+                components: [
+                    util
+                        .row()
+                        .setComponents(
+                            util
+                                .button()
+                                .setCustomId("yes")
+                                .setLabel("Yes")
+                                .setStyle(ButtonStyle.Success),
+                            util
+                                .button()
+                                .setCustomId("no")
+                                .setLabel("No")
+                                .setStyle(ButtonStyle.Danger),
+                        ),
+                ],
+            });
 
             let reason = "No reason provided";
 
-            if (mInteraction)
-                reason =
-                    mInteraction.fields.fields.at(0)?.value?.toString() ||
-                    reason;
+            const reasonInteraction = await askForReason
+                .awaitMessageComponent({
+                    componentType: ComponentType.Button,
+                    filter: (i) => i.user.id === clicker.id,
+                    time: 5000 * 2,
+                })
+                .catch(() => null);
+
+            if (reasonInteraction) {
+                if (reasonInteraction.customId === "yes") {
+                    await reasonInteraction.showModal(modal);
+
+                    const mInteraction = await reasonInteraction
+                        .awaitModalSubmit({
+                            time: 120000,
+                        })
+                        .catch(() => null);
+
+                    if (mInteraction) {
+                        reason =
+                            mInteraction.fields.fields
+                                .at(0)
+                                ?.value?.toString() || reason;
+
+                        await mInteraction.deferUpdate();
+                    }
+                }
+            }
 
             await user
                 .send({
@@ -156,17 +199,27 @@ export class ApplicationResponseButtons extends InteractionHandler {
                     const successOpts = {
                         content: `**Successfully DM'd the user that their application was \`${whatHappened}\` with reason: \`${reason}\`**`,
                         ephemeral: true,
+                        components: [],
                     };
-                    if (mInteraction) mInteraction.reply(successOpts);
-                    else message.reply(successOpts);
+
+                    if (reasonInteraction) {
+                        if (reasonInteraction.replied)
+                            reasonInteraction.editReply(successOpts);
+                        else reasonInteraction.reply(successOpts);
+                    } else message.reply(successOpts);
                 })
                 .catch(() => {
                     const failedOpts = {
                         content: `**Failed to DM the user that their application was \`${whatHappened}\` with reason: \`${reason}\`**`,
                         ephemeral: true,
+                        components: [],
                     };
-                    if (mInteraction) mInteraction.reply(failedOpts);
-                    else message.reply(failedOpts);
+
+                    if (reasonInteraction) {
+                        if (reasonInteraction.replied)
+                            reasonInteraction.editReply(failedOpts);
+                        else reasonInteraction.reply(failedOpts);
+                    } else message.reply(failedOpts);
                 });
         }
 

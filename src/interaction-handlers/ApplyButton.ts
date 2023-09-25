@@ -401,9 +401,7 @@ export class ApplyButton extends InteractionHandler {
 
         await startMessage.edit({
             embeds: [
-                embed.setTitle(
-                    "What do you you like the most about Minecraft?",
-                ),
+                embed.setTitle("What do you like the most about Minecraft?"),
             ],
         });
 
@@ -502,7 +500,7 @@ export class ApplyButton extends InteractionHandler {
                 embed
                     .setTitle("Any Screenshots?")
                     .setDescription(
-                        "Do you want to provide any screenshot/s of previous builds?\n\n***You will have 2 minutes to submit them, when prompted.***",
+                        "Do you want to provide any screenshot/s of previous builds?\n\n**You will have *10 minutes* to submit them, when prompted.**",
                     ),
             ],
             components: [yesNoButtons],
@@ -512,18 +510,9 @@ export class ApplyButton extends InteractionHandler {
             .awaitMessageComponent({
                 componentType: ComponentType.Button,
                 filter: (i) => i.user.id === user.id,
-                time,
+                time: time,
             })
             .catch(() => null);
-
-        if (!screenshotMessage) {
-            await thread.delete();
-            return interaction.followUp({
-                content:
-                    "**You took too long to answer, so your application process was terminated!**",
-                ephemeral: true,
-            });
-        }
 
         if (!screenshotMessage) {
             await thread.delete();
@@ -548,7 +537,7 @@ export class ApplyButton extends InteractionHandler {
                     embed
                         .setTitle(`Screenshot Submission`)
                         .setDescription(
-                            "Since you have screenshot/s, please upload them here or post links. (You can upload multiple images at once!)\n\n**You have *2 minutes* to submit them.**",
+                            "Since you have screenshot/s, please upload them here or post links. (You can upload multiple images at once!)\n\n**You have *10 minutes* to submit them.**",
                         ),
                 ],
                 components: [],
@@ -557,7 +546,7 @@ export class ApplyButton extends InteractionHandler {
             const screenshotsMessages = await thread
                 .awaitMessages({
                     filter: (m) => m.author.id === user.id,
-                    time: time * 2,
+                    time: 600000,
                     max: 1,
                 })
                 .catch(() => null);
@@ -617,7 +606,9 @@ export class ApplyButton extends InteractionHandler {
         await startMessage.edit({
             embeds: [
                 embed
-                    .setTitle("Do you have any questions?")
+                    .setTitle(
+                        "Do you have any questions?\n\n**You have *10 minutes* to submit them.**",
+                    )
                     .setDescription(null),
             ],
             components: [yesNoButtons],
@@ -626,7 +617,6 @@ export class ApplyButton extends InteractionHandler {
         const questionMessage = await startMessage
             .awaitMessageComponent({
                 componentType: ComponentType.Button,
-
                 filter: (i) => i.user.id === user.id,
                 time,
             })
@@ -651,7 +641,7 @@ export class ApplyButton extends InteractionHandler {
                     embed
                         .setTitle("Ask your questions here!")
                         .setDescription(
-                            "**You have *2 minutes* to ask them.**",
+                            "**You have *10 minutes* to ask them.**",
                         ),
                 ],
                 components: [],
@@ -660,7 +650,7 @@ export class ApplyButton extends InteractionHandler {
             const additionalQuestions = await thread
                 .awaitMessages({
                     filter: (m) => m.author.id === user.id,
-                    time: time * 2,
+                    time: 600000,
                     max: 1,
                 })
                 .catch(() => null);

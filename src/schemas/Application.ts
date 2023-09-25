@@ -6,7 +6,7 @@ export interface IApplication {
     userId: string;
     username: string;
     mcUsername: string;
-    mcPlatform: String;
+    mcPlatform: "java" | "bedrock";
     iconURL: string;
     guildId: string;
     questions: ApplicationQuestions;
