@@ -151,7 +151,7 @@ export class ApplyButton extends InteractionHandler {
 
         const messages: Collection<string, Message> = new Collection();
 
-        const time = 60000;
+        const time = 0;
 
         const platformInteraction = await startMessage
             .awaitMessageComponent({
@@ -510,7 +510,7 @@ export class ApplyButton extends InteractionHandler {
             .awaitMessageComponent({
                 componentType: ComponentType.Button,
                 filter: (i) => i.user.id === user.id,
-                time: time,
+                time,
             })
             .catch(() => null);
 
